@@ -2,8 +2,9 @@ import json
 import os
 from typing import Optional
 
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 
 def html_page(title: str, body: str) -> HTMLResponse:
@@ -33,9 +34,13 @@ def html_page(title: str, body: str) -> HTMLResponse:
 
 from minecraft_manager import RCONClient, tail_log
 
-CONFIG_PATH = 'server_config.json'
+CONFIG_PATH = "server_config.json"
 
 app = FastAPI(title="Minecraft Web Manager")
+ p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
+templates = Jinja2Templates(directory="templates")
+
+main
 
 
 def load_config() -> Optional[dict]:
@@ -49,6 +54,8 @@ def save_config(data: dict) -> None:
     with open(CONFIG_PATH, "w", encoding="utf8") as f:
         json.dump(data, f, indent=2)
 
+
+ p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
 
 def render_setup() -> HTMLResponse:
     body = """
@@ -129,22 +136,48 @@ async def setup(path: str = Form(...), host: str = Form(...), port: int = Form(.
     return render_dashboard("Configuration saved")
 
 
+ main
 def get_client() -> RCONClient:
     cfg = load_config()
     if not cfg:
-        raise RuntimeError('Server not configured')
-    client = RCONClient(cfg['host'], cfg['port'], cfg['password'])
+        raise RuntimeError("Server not configured")
+    client = RCONClient(cfg["host"], cfg["port"], cfg["password"])
     client.connect()
     return client
 
 
-@app.get('/players', response_class=HTMLResponse)
-async def players():
+def render_dashboard(request: Request, result: Optional[str] = None) -> HTMLResponse:
+    cfg = load_config()
+    if not cfg:
+        dirs = [d for d in os.listdir("/opt") if os.path.isdir(os.path.join("/opt", d))]
+        return templates.TemplateResponse("setup.html", {"request": request, "dirs": dirs})
+
     client = get_client()
     try:
-        resp = client.command('list')
+        players = client.command("list")
     finally:
         client.close()
+ p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
+
+    log_path = os.path.join(cfg["path"], "logs", "latest.log")
+    try:
+        logs = tail_log(log_path, 20)
+    except FileNotFoundError:
+        logs = f"Log file not found: {log_path}"
+
+    context = {
+        "request": request,
+        "players": players,
+        "logs": logs,
+        "result": result,
+    }
+    return templates.TemplateResponse("dashboard.html", context)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return render_dashboard(request)
+
     body = f"<pre>{resp}</pre><p><a href='/'>Back</a></p>"
     return html_page('Players', body)
 
@@ -160,15 +193,41 @@ async def broadcast_form():
         "<p><a href='/'>Back</a></p>"
     )
     return html_page('Broadcast', body)
+ main
 
 
-@app.post('/broadcast', response_class=HTMLResponse)
-async def broadcast(message: str = Form(...)):
+@app.post("/setup")
+async def setup(
+    request: Request,
+    server_dir: str = Form(...),
+    host: str = Form(...),
+    port: int = Form(...),
+    password: str = Form(...),
+):
+    save_config({"path": server_dir, "host": host, "port": port, "password": password})
+    return RedirectResponse("/", status_code=302)
+
+
+@app.post("/command", response_class=HTMLResponse)
+async def command(request: Request, cmd: str = Form(...)):
     client = get_client()
     try:
-        resp = client.command(f'say {message}')
+        result = client.command(cmd)
     finally:
         client.close()
+ p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
+    return render_dashboard(request, result)
+
+
+@app.post("/broadcast", response_class=HTMLResponse)
+async def broadcast(request: Request, message: str = Form(...)):
+    client = get_client()
+    try:
+        result = client.command(f"say {message}")
+    finally:
+        client.close()
+    return render_dashboard(request, result)
+
     return render_dashboard(resp)
 
 
@@ -183,25 +242,45 @@ async def ban_form():
         "<p><a href='/'>Back</a></p>"
     )
     return html_page('Ban Player', body)
+ main
 
 
-@app.post('/ban', response_class=HTMLResponse)
-async def ban(player: str = Form(...)):
+@app.post("/ban", response_class=HTMLResponse)
+async def ban(request: Request, player: str = Form(...)):
     client = get_client()
     try:
-        resp = client.command(f'ban {player}')
+        result = client.command(f"ban {player}")
     finally:
         client.close()
+ p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
+    return render_dashboard(request, result)
+
+
+@app.post("/restart", response_class=HTMLResponse)
+async def restart(request: Request):
+
     return render_dashboard(resp)
 
 
 @app.post('/restart', response_class=HTMLResponse)
 async def restart():
+ main
     client = get_client()
     try:
-        resp = client.command('restart')
+        result = client.command("restart")
     finally:
         client.close()
+ p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
+    return render_dashboard(request, result)
+
+
+@app.post("/whitelist", response_class=HTMLResponse)
+async def whitelist(
+    request: Request,
+    player: str = Form(...),
+    action: str = Form(...),  # "add" or "remove"
+):
+
     return render_dashboard(resp)
 
 
@@ -234,11 +313,18 @@ async def command_form():
 
 @app.post('/command', response_class=HTMLResponse)
 async def command(cmd: str = Form(...)):
+ main
     client = get_client()
     try:
-        resp = client.command(cmd)
+        if action == "remove":
+            result = client.command(f"whitelist remove {player}")
+        else:
+            result = client.command(f"whitelist add {player}")
     finally:
         client.close()
+ p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
+    return render_dashboard(request, result)
+
  464hqa-codex/corriger-l-erreur--nameerror--main-not-defined
     return render_dashboard(resp)
 
@@ -251,4 +337,5 @@ async def whitelist(player: str = Form(...), action: str = Form('add')):
     finally:
         client.close()
     return render_dashboard(resp)
+ main
 
