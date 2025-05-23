@@ -5,17 +5,19 @@
     <label for="server_dir" class="form-label">Server directory:</label>
     <select name="server_dir" id="server_dir" required class="form-select mb-2">
         {% for d in dirs %}
-        <option value="/opt/{{ d }}">{{ d }}</option>
+        <option value="/opt/{{ d }}" {% if cfg and cfg['path'] == '/opt/' ~ d %}selected{% endif %}>{{ d }}</option>
         {% endfor %}
     </select>
     <label for="host" class="form-label">RCON Host:</label>
-    <input name="host" id="host" required class="form-control mb-2">
+    <input name="host" id="host" value="{{ cfg['host'] if cfg else '' }}" required class="form-control mb-2">
     <label for="port" class="form-label">RCON Port:</label>
-    <input type="number" name="port" id="port" value="25575" required class="form-control mb-2">
+    <input type="number" name="port" id="port" value="{{ cfg['port'] if cfg else 25575 }}" required class="form-control mb-2">
     <label for="password" class="form-label">RCON Password:</label>
+rrzpcy-codex/ajouter-une-route-de-connexion-avec-authentification
     <input type="password" name="password" id="password" required class="form-control mb-2">
     <label for="admin_password" class="form-label">Admin Password:</label>
     <input type="password" name="admin_password" id="admin_password" required class="form-control mb-2">
+
     <button type="submit" class="btn btn-primary mt-2">Save</button>
 </form>
 {% endblock %}

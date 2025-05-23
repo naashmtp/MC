@@ -106,6 +106,7 @@ def render_dashboard(request: Request, result: Optional[str] = None) -> HTMLResp
 async def index(request: Request):
     return render_dashboard(request)
 
+rrzpcy-codex/ajouter-une-route-de-connexion-avec-authentification
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_form(request: Request):
@@ -129,6 +130,7 @@ async def logout():
     response = RedirectResponse("/login", status_code=302)
     response.delete_cookie("session")
     return response
+main
 
 @app.post("/setup")
 async def setup(
@@ -205,7 +207,8 @@ async def logs(request: Request, lines: int = 50):
         text = tail_log(log_path, lines)
     except FileNotFoundError:
         text = f"Log file not found: {log_path}"
-    return HTMLResponse(f"<pre>{text}</pre><p><a href='/'>Back</a></p>")
+    context = {"request": request, "logs": text}
+    return templates.TemplateResponse("logs.html", context)
 
 
 @app.websocket("/ws/logs")
