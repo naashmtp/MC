@@ -10,10 +10,12 @@ from minecraft_manager import RCONClient, tail_log
 CONFIG_PATH = 'server_config.json'
 
 app = FastAPI(title="Minecraft Web Manager")
+main
 
 
 def load_config() -> Optional[dict]:
     if os.path.exists(CONFIG_PATH):
+
         with open(CONFIG_PATH, 'r', encoding='utf8') as f:
             return json.load(f)
     return None
@@ -175,3 +177,4 @@ async def command(cmd: str = Form(...)):
     finally:
         client.close()
     return HTMLResponse(f"<pre>{resp}</pre><p><a href='/'>Back</a></p>")
+main

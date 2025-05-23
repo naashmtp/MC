@@ -1,6 +1,6 @@
 # Minecraft Server Manager
 
-
+ 
 
 ## Features
 
@@ -12,7 +12,6 @@
 - Send arbitrary commands
 - Tail the server log file
 
-## Usage
 
 Enable RCON in your `server.properties` file:
 
