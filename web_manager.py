@@ -1,9 +1,11 @@
 import json
 import os
+import hmac
+import hashlib
 from typing import Optional
 
 import asyncio
-from fastapi import FastAPI, Form, Request, WebSocket
+from fastapi import FastAPI, Form, Request, WebSocket, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -16,6 +18,9 @@ app = FastAPI(title="Minecraft Web Manager")
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
 
 def load_config() -> Optional[dict]:
     if os.path.exists(CONFIG_PATH):
@@ -26,6 +31,19 @@ def load_config() -> Optional[dict]:
 def save_config(data: dict) -> None:
     with open(CONFIG_PATH, "w", encoding="utf8") as f:
         json.dump(data, f, indent=2)
+
+
+def is_authenticated(request: Request) -> bool:
+    cfg = load_config()
+    if not cfg:
+        return False
+    token = request.cookies.get("session")
+    return bool(token and hmac.compare_digest(token, cfg.get("admin_password_hash", "")))
+
+
+def require_auth(request: Request):
+    if not is_authenticated(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 def get_client() -> RCONClient:
     cfg = load_config()
@@ -86,6 +104,30 @@ def render_dashboard(request: Request, result: Optional[str] = None) -> HTMLResp
 async def index(request: Request):
     return render_dashboard(request)
 
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_form(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.post("/login")
+async def login(request: Request, password: str = Form(...)):
+    cfg = load_config()
+    if not cfg:
+        return RedirectResponse("/", status_code=302)
+    if hmac.compare_digest(hash_password(password), cfg.get("admin_password_hash", "")):
+        response = RedirectResponse("/", status_code=302)
+        response.set_cookie("session", cfg.get("admin_password_hash"), httponly=True)
+        return response
+    return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid password"})
+
+
+@app.get("/logout")
+async def logout():
+    response = RedirectResponse("/login", status_code=302)
+    response.delete_cookie("session")
+    return response
+
 @app.post("/setup")
 async def setup(
     request: Request,
@@ -93,11 +135,18 @@ async def setup(
     host: str = Form(...),
     port: int = Form(...),
     password: str = Form(...),
+    admin_password: str = Form(...),
 ):
-    save_config({"path": server_dir, "host": host, "port": port, "password": password})
+    save_config({
+        "path": server_dir,
+        "host": host,
+        "port": port,
+        "password": password,
+        "admin_password_hash": hash_password(admin_password),
+    })
     return RedirectResponse("/", status_code=302)
 
-@app.post("/command", response_class=HTMLResponse)
+@app.post("/command", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def command(request: Request, cmd: str = Form(...)):
     client = get_client()
     try:
@@ -106,7 +155,7 @@ async def command(request: Request, cmd: str = Form(...)):
         client.close()
     return render_dashboard(request, result)
 
-@app.post("/broadcast", response_class=HTMLResponse)
+@app.post("/broadcast", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def broadcast(request: Request, message: str = Form(...)):
     client = get_client()
     try:
@@ -115,7 +164,7 @@ async def broadcast(request: Request, message: str = Form(...)):
         client.close()
     return render_dashboard(request, result)
 
-@app.post("/ban", response_class=HTMLResponse)
+@app.post("/ban", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def ban(request: Request, player: str = Form(...)):
     client = get_client()
     try:
@@ -124,7 +173,7 @@ async def ban(request: Request, player: str = Form(...)):
         client.close()
     return render_dashboard(request, result)
 
-@app.post("/whitelist", response_class=HTMLResponse)
+@app.post("/whitelist", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def whitelist(request: Request, player: str = Form(...), action: str = Form("add")):
     client = get_client()
     try:
@@ -133,7 +182,7 @@ async def whitelist(request: Request, player: str = Form(...), action: str = For
         client.close()
     return render_dashboard(request, result)
 
-@app.post("/restart", response_class=HTMLResponse)
+@app.post("/restart", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def restart(request: Request):
     client = get_client()
     try:
@@ -142,7 +191,7 @@ async def restart(request: Request):
         client.close()
     return render_dashboard(request, result)
 
-@app.get("/logs", response_class=HTMLResponse)
+@app.get("/logs", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def logs(request: Request, lines: int = 50):
     cfg = load_config()
     if not cfg:
@@ -160,6 +209,10 @@ async def websocket_logs(websocket: WebSocket):
     await websocket.accept()
     cfg = load_config()
     if not cfg:
+        await websocket.close()
+        return
+    token = websocket.cookies.get("session")
+    if not token or not hmac.compare_digest(token, cfg.get("admin_password_hash", "")):
         await websocket.close()
         return
     log_path = os.path.join(cfg["path"], "logs", "latest.log")
