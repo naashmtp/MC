@@ -11,6 +11,7 @@
 - Restart the server
 - Send arbitrary commands
 - Tail the server log file
+- Manage the server whitelist
 
 
 Enable RCON in your `server.properties` file:
@@ -47,6 +48,7 @@ Note: the restart command simply sends `restart` through RCON. You must have a p
 
 ## Web Interface
 
+p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
 This repository also provides a small FastAPI application offering a web-based dashboard.
 Install the extra dependencies and launch the server with:
 
@@ -59,4 +61,15 @@ Once running, open your browser to the chosen host and port. The interface allow
 you to send commands, broadcast messages, ban players, manage the whitelist and
 view recent logs directly from your browser.
 
+
+Run the FastAPI app with `uvicorn`:
+
+```bash
+uvicorn web_manager:app --host 0.0.0.0 --port 8000
+```
+
+On first launch you will be asked for the server directory and RCON details.
+The dashboard then allows you to send commands, broadcast messages, ban or
+whitelist players, restart the server and view recent log entries.
+main
 
