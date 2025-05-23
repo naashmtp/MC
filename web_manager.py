@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
 from minecraft_manager import RCONClient, tail_log
+import re
 
 CONFIG_PATH = "server_config.json"
 app = FastAPI(title="Minecraft Web Manager")
@@ -33,6 +34,22 @@ def get_client() -> RCONClient:
     client.connect()
     return client
 
+def parse_player_list(text: str) -> tuple[int, list[str]]:
+    """Parse the output of the Minecraft 'list' command."""
+    match = re.search(
+        r"There are (\d+) (?:of a max \d+ )?players online(?::\s*(.*))?",
+        text,
+    )
+    if not match:
+        return 0, []
+    count = int(match.group(1))
+    names: list[str] = []
+    if match.group(2):
+        name_str = match.group(2).strip()
+        names = [n.strip() for n in re.split(r",\s*", name_str) if n.strip()]
+    return count, names
+
+
 def render_dashboard(request: Request, result: Optional[str] = None) -> HTMLResponse:
     cfg = load_config()
     if not cfg:
@@ -41,9 +58,11 @@ def render_dashboard(request: Request, result: Optional[str] = None) -> HTMLResp
 
     client = get_client()
     try:
-        players = client.command("list")
+        players_raw = client.command("list")
     finally:
         client.close()
+
+    player_count, player_list = parse_player_list(players_raw)
 
     log_path = os.path.join(cfg["path"], "logs", "latest.log")
     try:
@@ -53,7 +72,9 @@ def render_dashboard(request: Request, result: Optional[str] = None) -> HTMLResp
 
     context = {
         "request": request,
-        "players": players,
+        "players_raw": players_raw,
+        "player_count": player_count,
+        "player_list": player_list,
         "logs": logs,
         "result": result,
     }

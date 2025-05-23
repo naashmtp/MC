@@ -26,8 +26,16 @@
 <form action="/restart" method="post" class="mb-3">
     <button type="submit" class="btn btn-warning">Restart Server</button>
 </form>
-<h3>Online Players</h3>
-<pre>{{ players }}</pre>
+<h3>Online Players ({{ player_count }})</h3>
+{% if player_count == 0 %}
+<p class="text-danger">No players online</p>
+{% else %}
+<ul>
+    {% for p in player_list %}
+    <li>{{ p }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 <h3>Latest Logs</h3>
 <pre>{{ logs }}</pre>
 {% endblock %}
