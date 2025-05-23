@@ -15,6 +15,14 @@
     <input name="player" placeholder="Player name" required>
     <button type="submit">Ban</button>
 </form>
+<form action="/whitelist" method="post">
+    <input name="player" placeholder="Whitelist player" required>
+    <select name="action">
+        <option value="add">Add</option>
+        <option value="remove">Remove</option>
+    </select>
+    <button type="submit">Update</button>
+</form>
 <form action="/restart" method="post">
     <button type="submit">Restart Server</button>
 </form>
