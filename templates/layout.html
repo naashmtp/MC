@@ -8,6 +8,11 @@
 <body>
     <div class="container-box">
         <h1>Minecraft Manager</h1>
+        {% if request.cookies.session %}
+        <p><a href="/logout">Logout</a></p>
+        {% else %}
+        <p><a href="/login">Login</a></p>
+        {% endif %}
         {% block content %}{% endblock %}
     </div>
 </body>
