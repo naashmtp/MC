@@ -20,8 +20,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 def hash_password(password: str) -> str:
-    """Return a SHA256 hex digest of the given password."""
-    return hashlib.sha256(password.encode()).hexdigest()
+
 
 
 def is_authenticated(request: Request) -> bool:
@@ -37,6 +36,7 @@ def require_auth(request: Request):
         raise HTTPException(status_code=401, detail="Unauthorized")
 
 
+
 def load_config() -> Optional[dict]:
     if os.path.exists(CONFIG_PATH):
         with open(CONFIG_PATH, "r", encoding="utf8") as f:
@@ -46,6 +46,19 @@ def load_config() -> Optional[dict]:
 def save_config(data: dict) -> None:
     with open(CONFIG_PATH, "w", encoding="utf8") as f:
         json.dump(data, f, indent=2)
+
+
+def is_authenticated(request: Request) -> bool:
+    cfg = load_config()
+    if not cfg:
+        return False
+    token = request.cookies.get("session")
+    return bool(token and hmac.compare_digest(token, cfg.get("admin_password_hash", "")))
+
+
+def require_auth(request: Request):
+    if not is_authenticated(request):
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 def get_client() -> RCONClient:
     cfg = load_config()
@@ -106,10 +119,13 @@ def render_dashboard(request: Request, result: Optional[str] = None) -> HTMLResp
 async def index(request: Request):
     return render_dashboard(request)
 
-rrzpcy-codex/ajouter-une-route-de-connexion-avec-authentification
+ra4pg6-codex/ajouter-une-route-de-connexion-avec-authentification
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_form(request: Request):
+    if is_authenticated(request):
+        return RedirectResponse("/", status_code=302)
+
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -130,7 +146,8 @@ async def logout():
     response = RedirectResponse("/login", status_code=302)
     response.delete_cookie("session")
     return response
-main
+ra4pg6-codex/ajouter-une-route-de-connexion-avec-authentification
+
 
 @app.post("/setup")
 async def setup(
@@ -141,15 +158,15 @@ async def setup(
     password: str = Form(...),
     admin_password: str = Form(...),
 ):
-    save_config(
-        {
-            "path": server_dir,
-            "host": host,
-            "port": port,
-            "password": password,
-            "admin_password_hash": hash_password(admin_password),
-        }
-    )
+ra4pg6-codex/ajouter-une-route-de-connexion-avec-authentification
+    save_config({
+        "path": server_dir,
+        "host": host,
+        "port": port,
+        "password": password,
+        "admin_password_hash": hash_password(admin_password),
+    })
+
     return RedirectResponse("/", status_code=302)
 
 @app.post("/command", response_class=HTMLResponse, dependencies=[Depends(require_auth)])

@@ -61,6 +61,8 @@ Start the dashboard with:
 uvicorn web_manager:app --host 0.0.0.0 --port 8000
 ```
 
-Open `http://localhost:8000` to configure the connection to your Minecraft server. During setup you will also choose an admin password required to access the dashboard. Once configured you can log in and send commands, broadcast messages, ban or whitelist players, restart the server and view the latest log lines.
+ra4pg6-codex/ajouter-une-route-de-connexion-avec-authentification
+Open `http://localhost:8000` to configure the connection to your Minecraft server. During setup you will be asked for an admin password used to access the dashboard. Once configured you can log in and send commands, broadcast messages, ban or whitelist players, restart the server and view the latest log lines.
+
 
 On first launch you will be asked for the server directory, RCON details and an admin password. The password is stored as a SHA256 hash in `server_config.json` and is required to log in. The dashboard then allows you to manage the server entirely from your browser.
