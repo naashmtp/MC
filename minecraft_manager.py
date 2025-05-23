@@ -100,22 +100,33 @@ def parse_args():
 
 
 def tail_log(path: str, lines: int = 20) -> str:
+    """Return the last ``lines`` lines from ``path``.
+
+    The function reads the file from the end in blocks so it can efficiently
+    return the requested number of lines even for large log files.
+    """
     if not os.path.exists(path):
         raise FileNotFoundError(path)
-    with open(path, 'rb') as f:
+
+    target_lines = max(0, lines)
+    remaining_lines = target_lines
+
+    with open(path, "rb") as f:
         f.seek(0, os.SEEK_END)
         end = f.tell()
-        size = 8192
-        data = b''
-        while end > 0 and lines >= 0:
-            start = max(0, end - size)
+        block_size = 8192
+        data = b""
+
+        while end > 0 and remaining_lines > 0:
+            start = max(0, end - block_size)
             f.seek(start)
             chunk = f.read(end - start)
             data = chunk + data
-            lines -= chunk.count(b'\n')
+            remaining_lines -= chunk.count(b"\n")
             end = start
-        text = data.decode('utf8', errors='replace')
-        return '\n'.join(text.splitlines()[-lines:])
+
+        text = data.decode("utf8", errors="replace")
+        return "\n".join(text.splitlines()[-target_lines:])
 
 
 def main():
