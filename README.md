@@ -1,6 +1,6 @@
 # Minecraft Server Manager
 
-This repository provides a simple command line utility to manage a Minecraft server using the RCON protocol.
+
 
 ## Features
 
