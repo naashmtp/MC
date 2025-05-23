@@ -11,6 +11,7 @@
 - Restart the server
 - Send arbitrary commands
 - Tail the server log file
+- Manage the server from a web dashboard
 
 
 Enable RCON in your `server.properties` file:
@@ -44,4 +45,17 @@ python minecraft_manager.py --host 127.0.0.1 --password secret --log-file /path/
 ```
 
 Note: the restart command simply sends `restart` through RCON. You must have a plugin or script handling server restarts.
+
+## Web Interface
+
+Install `fastapi`, `uvicorn`, and `jinja2` in your environment. Then run:
+
+```bash
+uvicorn web_manager:app --host 0.0.0.0 --port 8000
+```
+
+Open `http://<server>:8000` in your browser to access the dashboard. The first
+visit lets you configure the server directory and RCON credentials. Afterwards
+you can send commands, broadcast messages, ban or whitelist players, restart the
+server, and view recent log output.
 
