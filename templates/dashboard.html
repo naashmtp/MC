@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Dashboard</h2>
+<p><strong>Server:</strong> {{ config.server_dir }}</p>
+<form method="post" action="/command">
+    <label>Command:</label>
+    <input type="text" name="cmd" style="width:60%">
+    <button type="submit">Send</button>
+</form>
+<form method="post" action="/broadcast">
+    <label>Broadcast:</label>
+    <input type="text" name="message" style="width:60%">
+    <button type="submit">Send</button>
+</form>
+<form method="post" action="/ban">
+    <label>Ban player:</label>
+    <input type="text" name="player">
+    <button type="submit">Ban</button>
+</form>
+<form method="post" action="/restart">
+    <button type="submit">Restart Server</button>
+</form>
+<h3>Last Log Lines</h3>
+<pre>{{ log }}</pre>
+{% if response %}
+<h3>Response</h3>
+<pre>{{ response }}</pre>
+{% endif %}
+{% endblock %}
