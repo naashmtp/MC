@@ -45,3 +45,18 @@ python minecraft_manager.py --host 127.0.0.1 --password secret --log-file /path/
 
 Note: the restart command simply sends `restart` through RCON. You must have a plugin or script handling server restarts.
 
+## Web Interface
+
+This repository also provides a small FastAPI application offering a web-based dashboard.
+Install the extra dependencies and launch the server with:
+
+```bash
+pip install fastapi uvicorn jinja2
+uvicorn web_manager:app --host 0.0.0.0 --port 8000
+```
+
+Once running, open your browser to the chosen host and port. The interface allows
+you to send commands, broadcast messages, ban players, manage the whitelist and
+view recent logs directly from your browser.
+
+
