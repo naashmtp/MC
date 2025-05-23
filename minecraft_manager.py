@@ -31,9 +31,12 @@ class RCONClient:
         if self.sock is None:
             raise RuntimeError("RCON socket is not connected")
         self.request_id += 1
-        data = body.encode('utf8') + b"\x00"
-        length = len(data) + 8
-        packet = struct.pack('<iii', length - 4, self.request_id, packet_type) + data + b"\x00"
+        payload = (
+            struct.pack('<ii', self.request_id, packet_type)
+            + body.encode("utf8")
+            + b"\x00\x00"
+        )
+        packet = struct.pack("<i", len(payload)) + payload
         self.sock.sendall(packet)
         return self.request_id
 
