@@ -86,6 +86,13 @@ def render_dashboard(request: Request, result: Optional[str] = None) -> HTMLResp
 async def index(request: Request):
     return render_dashboard(request)
 
+@app.get("/setup", response_class=HTMLResponse)
+async def setup_get(request: Request):
+    dirs = [d for d in os.listdir("/opt") if os.path.isdir(os.path.join("/opt", d))]
+    cfg = load_config()
+    return templates.TemplateResponse("setup.html", {"request": request, "dirs": dirs, "cfg": cfg})
+
+
 @app.post("/setup")
 async def setup(
     request: Request,
@@ -152,7 +159,8 @@ async def logs(request: Request, lines: int = 50):
         text = tail_log(log_path, lines)
     except FileNotFoundError:
         text = f"Log file not found: {log_path}"
-    return HTMLResponse(f"<pre>{text}</pre><p><a href='/'>Back</a></p>")
+    context = {"request": request, "logs": text}
+    return templates.TemplateResponse("logs.html", context)
 
 
 @app.websocket("/ws/logs")

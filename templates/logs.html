@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Server Logs</h2>
+<pre id="log-output">{{ logs }}</pre>
+<script>
+const logBox = document.getElementById('log-output');
+const ws = new WebSocket(`ws://${location.host}/ws/logs`);
+ws.onmessage = (event) => {
+    logBox.textContent += '\n' + event.data;
+    logBox.scrollTop = logBox.scrollHeight;
+};
+</script>
+{% endblock %}
