@@ -3,28 +3,28 @@
 {% if result %}
 <p><strong>Result:</strong> {{ result }}</p>
 {% endif %}
-<form action="/command" method="post">
-    <input name="cmd" placeholder="Command" required>
-    <button type="submit">Send</button>
+<form action="/command" method="post" class="mb-3">
+    <input name="cmd" placeholder="Command" required class="form-control mb-2">
+    <button type="submit" class="btn btn-primary">Send</button>
 </form>
-<form action="/broadcast" method="post">
-    <input name="message" placeholder="Broadcast message" required>
-    <button type="submit">Broadcast</button>
+<form action="/broadcast" method="post" class="mb-3">
+    <input name="message" placeholder="Broadcast message" required class="form-control mb-2">
+    <button type="submit" class="btn btn-primary">Broadcast</button>
 </form>
-<form action="/ban" method="post">
-    <input name="player" placeholder="Player name" required>
-    <button type="submit">Ban</button>
+<form action="/ban" method="post" class="mb-3">
+    <input name="player" placeholder="Player name" required class="form-control mb-2">
+    <button type="submit" class="btn btn-danger">Ban</button>
 </form>
-<form action="/whitelist" method="post">
-    <input name="player" placeholder="Whitelist player" required>
-    <select name="action">
+<form action="/whitelist" method="post" class="mb-3">
+    <input name="player" placeholder="Whitelist player" required class="form-control mb-2">
+    <select name="action" class="form-select mb-2">
         <option value="add">Add</option>
         <option value="remove">Remove</option>
     </select>
-    <button type="submit">Update</button>
+    <button type="submit" class="btn btn-primary">Update</button>
 </form>
-<form action="/restart" method="post">
-    <button type="submit">Restart Server</button>
+<form action="/restart" method="post" class="mb-3">
+    <button type="submit" class="btn btn-warning">Restart Server</button>
 </form>
 <h3>Online Players</h3>
 <pre>{{ players }}</pre>
