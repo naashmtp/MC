@@ -13,7 +13,11 @@
     <label for="port" class="form-label">RCON Port:</label>
     <input type="number" name="port" id="port" value="{{ cfg['port'] if cfg else 25575 }}" required class="form-control mb-2">
     <label for="password" class="form-label">RCON Password:</label>
-    <input type="password" name="password" id="password" value="{{ cfg['password'] if cfg else '' }}" required class="form-control mb-2">
+rrzpcy-codex/ajouter-une-route-de-connexion-avec-authentification
+    <input type="password" name="password" id="password" required class="form-control mb-2">
+    <label for="admin_password" class="form-label">Admin Password:</label>
+    <input type="password" name="admin_password" id="admin_password" required class="form-control mb-2">
+
     <button type="submit" class="btn btn-primary mt-2">Save</button>
 </form>
 {% endblock %}

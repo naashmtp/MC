@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Login</h2>
+{% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
+<form method="post">
+    <input type="password" name="password" placeholder="Password" required class="form-control mb-2">
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+{% endblock %}
