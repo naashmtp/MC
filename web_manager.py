@@ -5,12 +5,14 @@ from typing import Optional
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
 from minecraft_manager import RCONClient, tail_log
 
 CONFIG_PATH = "server_config.json"
 app = FastAPI(title="Minecraft Web Manager")
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 def load_config() -> Optional[dict]:
