@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+{% if result %}
+<p><strong>Result:</strong> {{ result }}</p>
+{% endif %}
+<form action="/command" method="post">
+    <input name="cmd" placeholder="Command" required>
+    <button type="submit">Send</button>
+</form>
+<form action="/broadcast" method="post">
+    <input name="message" placeholder="Broadcast message" required>
+    <button type="submit">Broadcast</button>
+</form>
+<form action="/ban" method="post">
+    <input name="player" placeholder="Player name" required>
+    <button type="submit">Ban</button>
+</form>
+<form action="/restart" method="post">
+    <button type="submit">Restart Server</button>
+</form>
+<h3>Online Players</h3>
+<pre>{{ players }}</pre>
+<h3>Latest Logs</h3>
+<pre>{{ logs }}</pre>
+{% endblock %}
