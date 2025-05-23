@@ -2,7 +2,8 @@ import json
 import os
 from typing import Optional
 
-from fastapi import FastAPI, Form, Request
+import asyncio
+from fastapi import FastAPI, Form, Request, WebSocket
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -131,4 +132,26 @@ async def logs(request: Request, lines: int = 50):
     except FileNotFoundError:
         text = f"Log file not found: {log_path}"
     return HTMLResponse(f"<pre>{text}</pre><p><a href='/'>Back</a></p>")
+
+
+@app.websocket("/ws/logs")
+async def websocket_logs(websocket: WebSocket):
+    await websocket.accept()
+    cfg = load_config()
+    if not cfg:
+        await websocket.close()
+        return
+    log_path = os.path.join(cfg["path"], "logs", "latest.log")
+    try:
+        with open(log_path, "r", encoding="utf8") as f:
+            f.seek(0, os.SEEK_END)
+            while True:
+                line = f.readline()
+                if line:
+                    await websocket.send_text(line.rstrip())
+                else:
+                    await asyncio.sleep(1)
+    except Exception:
+        await websocket.close()
+
 
