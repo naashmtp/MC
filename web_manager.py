@@ -239,6 +239,7 @@ async def command(cmd: str = Form(...)):
         resp = client.command(cmd)
     finally:
         client.close()
+ 464hqa-codex/corriger-l-erreur--nameerror--main-not-defined
     return render_dashboard(resp)
 
 
@@ -250,3 +251,4 @@ async def whitelist(player: str = Form(...), action: str = Form('add')):
     finally:
         client.close()
     return render_dashboard(resp)
+
