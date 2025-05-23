@@ -1,6 +1,6 @@
 # Minecraft Server Manager
 
-This repository provides utilities to manage a Minecraft server using the RCON protocol. It includes a command line tool and a lightweight web interface.
+
 
 ## Features
 
@@ -45,18 +45,4 @@ python minecraft_manager.py --host 127.0.0.1 --password secret --log-file /path/
 ```
 
 Note: the restart command simply sends `restart` through RCON. You must have a plugin or script handling server restarts.
-
-### Web Interface
-
-You can also run a small web UI to manage the server. Launch it with:
-
-```bash
-uvicorn web_manager:app --reload --port 8000
-```
-
-On first launch the app asks for the path to your server folder as well as the
-RCON connection details. These settings are saved in `server_config.json`.
-After configuration, open <http://localhost:8000> in a browser to access
-actions like viewing players online, banning, broadcasting messages, restarting
-the server and tailing the latest log file.
 
