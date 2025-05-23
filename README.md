@@ -46,16 +46,25 @@ python minecraft_manager.py --host 127.0.0.1 --password secret --log-file /path/
 
 Note: the restart command simply sends `restart` through RCON. You must have a plugin or script handling server restarts.
 
+ l7slgt-codex/corriger-l-erreur--nameerror--main-not-defined
+## Web Dashboard
+
+This project also includes a small FastAPI application that lets you manage the server from a browser. Install the web dependencies and run Uvicorn:
+
 ## Web Interface
 
 p0df9a-codex/corriger-l-erreur--nameerror--main-not-defined
 This repository also provides a small FastAPI application offering a web-based dashboard.
 Install the extra dependencies and launch the server with:
+main
 
 ```bash
 pip install fastapi uvicorn jinja2
 uvicorn web_manager:app --host 0.0.0.0 --port 8000
 ```
+
+l7slgt-codex/corriger-l-erreur--nameerror--main-not-defined
+Open `http://localhost:8000` to configure the connection to your Minecraft server. Once configured you can send commands, broadcast messages, ban or whitelist players, restart the server and view the latest log lines.
 
 Once running, open your browser to the chosen host and port. The interface allows
 you to send commands, broadcast messages, ban players, manage the whitelist and
@@ -71,5 +80,6 @@ uvicorn web_manager:app --host 0.0.0.0 --port 8000
 On first launch you will be asked for the server directory and RCON details.
 The dashboard then allows you to send commands, broadcast messages, ban or
 whitelist players, restart the server and view recent log entries.
+main
 main
 
